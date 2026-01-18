@@ -3,9 +3,7 @@ Description=BELABOXWS LESSGOOO
 After=network.target
 
 [Service]
-User=root
-Group=root
-ExecStart=/usr/bin/nodejs /root/BELABOX-Cloud-Homemade/src/index.js
+ExecStart=/usr/bin/nodejs /home/user/BELABOX-Cloud-Homemade/src/index.js
 Restart=always
 RestartSec=1
 WorkingDirectory=/root/BELABOX-Cloud-Homemade
