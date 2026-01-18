@@ -1,12 +1,11 @@
-import YAML from "yaml";
 import fs from "fs";
 
-export const config = YAML.parse(fs.readFileSync("config.yml", "utf-8"));
+export const config = JSON.parse(fs.readFileSync("config.json", "utf-8"));
 
 export function saveToken(token) {
     config.token = token;
-    fs.writeFileSync("config.yml", YAML.stringify(config), {
+    fs.writeFileSync("config.json", JSON.stringify(config), {
         encoding: "utf-8",
     });
-    console.log("Saved token")
+    console.log("Saved token");
 }

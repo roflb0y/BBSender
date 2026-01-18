@@ -7,7 +7,7 @@ console.log("Connecting...");
 
 socket.addEventListener("open", (event) => {
     console.log("Connection established");
-    if (config.token !== null) {
+    if (config.token !== "") {
         socket.send(
             JSON.stringify({
                 auth: { token: config.token },
@@ -27,9 +27,8 @@ socket.addEventListener("message", async (event) => {
     if (j.auth?.success === true) {
         console.log("Logged in. Starting to send messages");
     }
-    if (j.auth?.auth_token && config.token === null) {
+    if (j.auth?.auth_token && config.token === "") {
         saveToken(j.auth.auth_token);
-        console.log("Saved token")
     }
     sendStats(j);
 });
