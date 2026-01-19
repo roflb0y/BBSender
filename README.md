@@ -1,6 +1,6 @@
 This is a simple script that captures all of the BELABOX® websocket messages and sends them to the Internet. This can be used for monitoring (e.g. using my [SRT Exporter](https://github.com/roflb0y/SRTExporter) for Prometheus)
 
-# Note: this project is not affiliated with BELABOX®
+#### Note: this project is not affiliated with BELABOX®
 
 ### Installing
 1. Login to your SBC (Radxa Rock, Orange Pi, Jetson Nano) via SSH. Clone the repo and cd into it.
