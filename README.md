@@ -29,9 +29,9 @@ This is a simple script that captures all of the BELABOX® websocket messages an
    If so then proceed
 6. Install systemd service
    ```shell
-   sudo cp belaboxws.service /etc/systemd/system/belaboxws.service
+   sudo cp bbsender.service /etc/systemd/system/bbsender.service
    
    sudo systemctl daemon-reload
-   sudo systemctl start belaboxws
-   sudo systemctl enable belaboxws
+   sudo systemctl start bbsender
+   sudo systemctl enable bbsender
    ```
