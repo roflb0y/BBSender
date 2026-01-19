@@ -3,8 +3,8 @@ This is a simple script that captures all of the BELABOX websocket messages and 
 ### Installing
 1. Login to your SBC (Radxa Rock, Orange Pi, Jetson Nano) via SSH. Clone the repo and cd into it.
    ```shell
-   git clone https://github.com/roflb0y/BELABOX-Cloud-Homemade
-   cd BELABOX-Cloud-Homemade
+   git clone https://github.com/roflb0y/BBSender
+   cd BBSender
    ```
 2. Install nano (because it's not installed by default)
    ```shell
