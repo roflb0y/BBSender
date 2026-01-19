@@ -21,8 +21,7 @@ This is a simple script that captures all of the BELABOX websocket messages and 
    npm run start
    ```
    If everything is set up correctly, if you go to your metrics page at ```http://<ip>:5050/belaboxstats``` you should see something like this...
-   ![Uploading brave_8B7jXS4ulu.png…]()
-
+   <img width="400" alt="brave_8B7jXS4ulu" src="https://github.com/user-attachments/assets/921ed0ed-4502-4fe3-9c0b-f90beea397d2" />
    If so then proceed...
 6. Install systemd service
    ```shell
