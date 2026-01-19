@@ -22,7 +22,7 @@ This is a simple script that captures all of the BELABOX websocket messages and 
    ```
    If everything is set up correctly, in your console you should see something like this...
    <img width="400" alt="MobaXterm_xUkGCngXIm" src="https://github.com/user-attachments/assets/e58bb4f7-ca2c-4394-beff-1b19e2ba46ac" />
-   and if you go to your metrics page at ```http://<ip>:5050/belaboxstats```...
+   and if you go to your metrics page at ```http://<ip>:5050/belaboxstats```...<br/>
    <img width="400" alt="brave_8B7jXS4ulu" src="https://github.com/user-attachments/assets/921ed0ed-4502-4fe3-9c0b-f90beea397d2" /><br/>
    If so then proceed
 6. Install systemd service
