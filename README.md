@@ -23,7 +23,7 @@ This is a simple script that captures all of the BELABOX® websocket messages an
    npm run start
    ```
    If everything is set up correctly, in your console you should see something like this...<br>
-   <img height="150" alt="image" src="https://github.com/user-attachments/assets/3970621c-f7a7-4374-a4c4-8807f17a7a41" />
+   <img height="150" alt="image" src="https://github.com/user-attachments/assets/3970621c-f7a7-4374-a4c4-8807f17a7a41" /><br>
    and if you go to your metrics page at ```http://<ip>:5050/metrics```...<br>
    <img height="150" alt="brave_8B7jXS4ulu" src="https://github.com/user-attachments/assets/921ed0ed-4502-4fe3-9c0b-f90beea397d2" /><br>
    If so then proceed
