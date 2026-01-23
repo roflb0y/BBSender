@@ -31,7 +31,8 @@ senderSocket.on("open", () => {
 
     belaboxSocket.on("error", (err) => {
         console.log(`BB socket error: ${err.message}`);
-    })
+        process.exit(0);
+    });
 
     belaboxSocket.addEventListener("message", async (event) => {
         const j = JSON.parse(event.data);
