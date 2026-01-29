@@ -1,93 +1,163 @@
 import { config, saveToken } from "./config.js";
 
 import { WebSocket } from "ws";
+import os from "os";
 
 let belaboxSocket;
-const senderSocket = new WebSocket(config.url);
+let senderSocket;
+
+let networksCount = 0;
 
 console.log("Connecting...");
 
-senderSocket.on("open", () => {
-    console.log(`Connected to the receiver WebSocket: ${config.url}`);
-    console.log("Connecting to ws://belabox.local...");
-    belaboxSocket = new WebSocket("ws://belabox.local");
+function checkNetworkAvailability() {
+    const interfaces = os.networkInterfaces();
+    const interfacesKeys = Object.keys(interfaces);
 
-    belaboxSocket.on("open", () => {
-        console.log("Connected to ws://belabox.local");
-        if (config.token !== "") {
-            belaboxSocket.send(
-                JSON.stringify({
-                    auth: { token: config.token },
-                }),
-            );
-        } else {
-            belaboxSocket.send(
-                JSON.stringify({
-                    auth: { password: config.password, persistent_token: true },
-                }),
-            );
-        }
-    });
+    if (networksCount === 0) {
+        interfacesKeys.forEach((network) => {
+            if (interfaces[network][0].internal === false)
+                console.log(
+                    `${network}: ${JSON.stringify(interfaces[network][0], undefined, 1)}`,
+                );
+        });
+        networksCount = interfacesKeys.length;
+        return;
+    }
 
-    belaboxSocket.on("error", (err) => {
-        console.log(`BB socket error: ${err.message}`);
-        process.exit(0);
-    });
-
-    belaboxSocket.addEventListener("message", async (event) => {
-        const j = JSON.parse(event.data);
-
-        // node v12 type beat
-        if (
-            j.notification &&
-            j.notification.show &&
-            j.notification.show[0] &&
-            j.notification.show[0].msg === "Invalid password"
-        ) {
+    if (interfacesKeys.length !== networksCount) {
+        if (senderSocket instanceof WebSocket) {
             console.log(
-                "Invalid password. Make sure to set the right password in config.json",
+                "networks changed. Reconnecting to the receiver WebSocket...",
             );
-            return;
+            senderSocket.removeAllListeners();
+            senderSocket.close();
+            setTimeout(connectSender, 1000);
         }
-        if (j.auth && j.auth.success === true) {
-            console.log("Logged in. Starting to send messages");
-            return;
-        }
-        if (j.auth && j.auth.auth_token && config.token === "") {
-            saveToken(j.auth.auth_token);
-            return;
-        }
+    }
 
-        if (senderSocket.readyState === senderSocket.OPEN) {
-            senderSocket.send(event.data, (err) => {
-                if (err) console.log(`Error: ${err}`);
-            });
-        } else {
-            console.log("senderSocket is closed. exiting...");
-            process.exit(0);
-        }
+    networksCount = interfacesKeys.length;
+}
+
+checkNetworkAvailability();
+setInterval(checkNetworkAvailability, 3000);
+
+function connectSender() {
+    connect();
+    function connect() {
+        senderSocket = new WebSocket(config.url);
+
+        senderSocket.on("open", () => {
+            console.log(`Connected to the receiver WebSocket: ${config.url}`);
+
+            if (
+                !(
+                    belaboxSocket &&
+                    belaboxSocket.readyState === belaboxSocket.OPEN
+                )
+            ) {
+                connectBelabox();
+            }
+        });
+
+        senderSocket.on("close", (code, reason) => {
+            console.log(
+                `senderSocket is closed. reason: ${reason.toString("utf-8")}. Reconnecting...`,
+            );
+            senderSocket = undefined;
+            setTimeout(connectSender, 1000);
+        });
+
+        senderSocket.on("error", (err) => {
+            console.log(`Sender socket error: ${err.message}`);
+        });
+    }
+}
+
+async function handleBelabox(data) {
+    const j = JSON.parse(data);
+
+    // node v12 type beat
+    if (
+        j.notification &&
+        j.notification.show &&
+        j.notification.show[0] &&
+        j.notification.show[0].msg === "Invalid password"
+    ) {
+        console.log(
+            "Invalid password. Make sure to set the right password in config.json",
+        );
+        return;
+    }
+    if (j.auth && j.auth.success === true) {
+        console.log("Logged in. Starting to send messages");
+        return;
+    }
+    if (j.auth && j.auth.auth_token && config.token === "") {
+        saveToken(j.auth.auth_token);
+        return;
+    }
+
+    senderSocket.send(data, (err) => {
+        if (err) console.log(`senderSocket: ${err}`);
     });
 
-    belaboxSocket.on("close", () => {
-        console.log("BELABOX socket closed. Exiting...");
-        process.exit(0);
-    });
-});
+    // if (senderSocket.readyState === senderSocket.OPEN) {
+    //     senderSocket.send(data, (err) => {
+    //         if (err) console.log(`Error: ${err}`);
+    //     });
+    // } else {
+    //     console.log("senderSocket is closed");
+    //     //setTimeout(connectSender, 1000);
+    // }
+}
 
-senderSocket.on("close", (code, reason) => {
-    console.log(
-        `senderSocket is closed. reason: ${reason.toString("utf-8")}. exiting...`,
-    );
-    process.exit(0);
-});
+function connectBelabox() {
+    connect();
 
-senderSocket.on("error", (err) => {
-    console.log(`Sender socket error: ${err.message}`);
-    process.exit(0);
-});
+    function connect() {
+        console.log("Connecting to ws://belabox.local...");
+        belaboxSocket = new WebSocket("ws://belabox.local");
+
+        belaboxSocket.on("open", () => {
+            console.log("Connected to ws://belabox.local");
+            if (config.token !== "") {
+                belaboxSocket.send(
+                    JSON.stringify({
+                        auth: { token: config.token },
+                    }),
+                );
+            } else {
+                belaboxSocket.send(
+                    JSON.stringify({
+                        auth: {
+                            password: config.password,
+                            persistent_token: true,
+                        },
+                    }),
+                );
+            }
+        });
+
+        belaboxSocket.on("message", handleBelabox);
+
+        belaboxSocket.on("error", (err) => {
+            console.log(`BELABOX socket error: ${err}`);
+        });
+
+        belaboxSocket.on("close", () => {
+            console.log("belaboxSocket is closed. Reconnecting...");
+            belaboxSocket = undefined;
+
+            setTimeout(connectBelabox, 1000);
+        });
+    }
+}
+
+connectSender();
 
 setInterval(function () {
-    if (belaboxSocket.readyState === belaboxSocket.OPEN) {
+    if (belaboxSocket && belaboxSocket.readyState === belaboxSocket.OPEN) {
         belaboxSocket.send(JSON.stringify({ keepalive: null }));
     }
 }, 10000);
