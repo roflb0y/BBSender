@@ -42,6 +42,8 @@ function checkNetworkAvailability() {
 checkNetworkAvailability();
 setInterval(checkNetworkAvailability, 3000);
 
+let lastMaxBr = undefined;
+
 function connectSender() {
     connect();
     function connect() {
@@ -58,24 +60,28 @@ function connectSender() {
             ) {
                 connectBelabox();
             }
+            if (lastMaxBr !== undefined) {
+                senderSocket.send(JSON.stringify(lastMaxBr));
+            }
         });
 
         senderSocket.on("close", (code, reason) => {
             console.log(
-                `senderSocket is closed. reason: ${reason.toString("utf-8")}. Reconnecting...`,
+                `senderSocket is closed. Reconnecting...`,
             );
             senderSocket = undefined;
             setTimeout(connectSender, 1000);
         });
 
         senderSocket.on("error", (err) => {
-            console.log(`Sender socket error: ${err.message}`);
+            console.log(`Sender socket error: ${err}`);
         });
     }
 }
 
 async function handleBelabox(data) {
     const j = JSON.parse(data);
+    //console.log(j)
 
     // node v12 type beat
     if (
@@ -93,6 +99,14 @@ async function handleBelabox(data) {
         console.log("Logged in. Starting to send messages");
         return;
     }
+    if (j.config && lastMaxBr === undefined) {
+        lastMaxBr = {bitrate: {max_br: j.config.max_br}}
+    }
+
+    if (j.bitrate && lastMaxBr !== undefined) {
+        lastMaxBr = j // here the incoming data is already {bitrate: {max_br: N}}
+    }
+
     if (j.auth && j.auth.auth_token && config.token === "") {
         saveToken(j.auth.auth_token);
         return;
