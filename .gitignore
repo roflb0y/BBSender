@@ -3,3 +3,5 @@ package-lock.json
 config.json
 
 run.bat
+
+.DS_Store
